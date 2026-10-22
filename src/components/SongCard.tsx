@@ -10,12 +10,12 @@ export function SongCard({ track, onPress }: SongCardProps) {
     <button
       type="button"
       onClick={onPress}
-      className="w-[250px] p-2 flex flex-col items-center transition-transform duration-150 active:scale-95"
+      className="w-[calc(var(--art,220px)+16px)] p-2 flex flex-col items-center transition-transform duration-150 active:scale-95"
     >
       <img
         src={track.albumArtUrl}
         alt={track.name}
-        className="w-[220px] h-[220px] rounded-lg mb-2 object-cover"
+        className="size-[var(--art,220px)] rounded-lg mb-2 object-cover"
         draggable={false}
       />
       <p className="text-base font-semibold text-center w-full truncate text-[var(--color-text)]">
