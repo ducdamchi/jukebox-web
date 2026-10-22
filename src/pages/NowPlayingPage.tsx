@@ -1,17 +1,25 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { ProgressBar } from "@/components/ProgressBar";
 import { useSpotifyPlayer } from "@/hooks/useSpotifyPlayer";
 import type { Track } from "@/types/spotify";
+
+// If audio hasn't started by then, treat playback as stalled
+const PLAYBACK_START_TIMEOUT_MS = 15_000;
+// How long a playback error stays on screen before returning home
+const ERROR_RETURN_DELAY_MS = 8_000;
 
 export function NowPlayingPage() {
   const navigate = useNavigate();
   const { state } = useLocation() as { state: { barcode: string; track: Track } | null };
   const track = state?.track ?? null;
   const [progress, setProgress] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const started = useRef(false);
 
   const { play, pause } = useSpotifyPlayer({
     onStateChange: (s) => {
+      if (!s.paused) started.current = true;
       if (s.duration > 0) {
         setProgress(s.position / s.duration);
       }
@@ -19,10 +27,30 @@ export function NowPlayingPage() {
     onTrackEnd: () => {
       navigate("/", { replace: true });
     },
-    onError: () => {
-      navigate("/", { replace: true });
+    onError: (message) => {
+      console.error("[playback]", message);
+      setError((prev) => prev ?? message);
     },
   });
+
+  // Surface a stall instead of sitting on a frozen screen
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!started.current) {
+        setError((prev) => prev ?? "Playback didn't start.");
+      }
+    }, PLAYBACK_START_TIMEOUT_MS);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Show the error briefly, then return home
+  useEffect(() => {
+    if (!error) return;
+    const timer = setTimeout(() => {
+      navigate("/", { replace: true });
+    }, ERROR_RETURN_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [error, navigate]);
 
   // Redirect home if no track state (direct nav or page refresh)
   useEffect(() => {
@@ -73,13 +101,21 @@ export function NowPlayingPage() {
       <p className="text-center mt-2 text-lg text-[var(--color-text-secondary)] truncate max-w-[400px]">
         {track.artist}
       </p>
-      <ProgressBar progress={progress} className="mt-8 w-[280px]" />
+      {error ? (
+        <p className="mt-8 text-center text-[#e53935] max-w-[400px]">
+          Couldn't play this song. {error}
+        </p>
+      ) : (
+        <ProgressBar progress={progress} className="mt-8 w-[280px]" />
+      )}
       <button
         type="button"
         onClick={handleEndEarly}
         className="mt-8 px-6 py-3 bg-[var(--color-bg-element)] rounded-lg active:opacity-60 transition-opacity"
       >
-        <span className="text-[var(--color-text-secondary)] text-lg">End Song</span>
+        <span className="text-[var(--color-text-secondary)] text-lg">
+          {error ? "Back to Home" : "End Song"}
+        </span>
       </button>
     </div>
   );
