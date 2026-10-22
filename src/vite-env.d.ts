@@ -4,10 +4,6 @@ interface ImportMetaEnv {
   readonly VITE_SPOTIFY_CLIENT_ID: string;
   readonly VITE_SPOTIFY_REDIRECT_URI: string;
   readonly VITE_SPOTIFY_PLAYLIST_ID: string;
-  readonly VITE_SPOTIFY_SCOPES: string;
-  readonly VITE_DAILY_PLAY_LIMIT: string;
-  readonly VITE_SONG_CHOICES_COUNT: string;
-  readonly VITE_IDLE_RETURN_TIMEOUT_MS: string;
 }
 
 interface ImportMeta {

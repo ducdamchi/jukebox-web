@@ -142,7 +142,7 @@ export function IdlePage() {
       {/* Center — scanner image */}
       <div className="flex-1 flex justify-center items-center">
         <img
-          src="/images/scanner.png"
+          src={`${import.meta.env.BASE_URL}images/scanner.png`}
           alt="Scanner"
           className="w-[180px] h-[180px] opacity-85 object-contain dark:invert"
           draggable={false}
