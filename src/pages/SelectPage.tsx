@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import { useNavigate, useParams } from "react-router"
 import { RingCountdown } from "@/components/RingCountdown"
 import { SongCarousel } from "@/components/SongCarousel"
+import { useSpotifyPlayerContext } from "@/providers/SpotifyProvider"
 import {
   DAILY_PLAY_LIMIT,
   IDLE_RETURN_TIMEOUT_MS,
@@ -16,6 +17,7 @@ import type { Track } from "@/types/spotify"
 export function SelectPage() {
   const navigate = useNavigate()
   const { barcode } = useParams<{ barcode: string }>()
+  const { activate } = useSpotifyPlayerContext()
   const [tracks, setTracks] = useState<Track[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -77,6 +79,8 @@ export function SelectPage() {
   }, [creditsRemaining, navigate])
 
   const handleSelectTrack = (track: Track) => {
+    // Runs inside the tap, so the browser lets the player start audio
+    activate()
     if (barcode) recordPlay(barcode)
     navigate("/now-playing", { state: { barcode, track } })
   }

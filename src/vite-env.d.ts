@@ -24,6 +24,7 @@ interface SpotifyPlayerState {
 interface SpotifyPlayerInstance {
   connect(): Promise<boolean>;
   disconnect(): void;
+  activateElement(): Promise<void>;
   pause(): Promise<void>;
   resume(): Promise<void>;
   addListener(event: "ready", cb: (data: { device_id: string }) => void): void;
