@@ -13,5 +13,7 @@ export const SPOTIFY_SCOPES = "streaming user-read-email user-read-private";
 export const DAILY_PLAY_LIMIT = 3;
 // Number of song choices shown on the select screen
 export const SONG_CHOICES_COUNT = 20;
+// Song choices per carousel page on the select screen
+export const SONGS_PER_PAGE = 4;
 // Idle timeout before returning to scan screen
 export const IDLE_RETURN_TIMEOUT_MS = 60_000;

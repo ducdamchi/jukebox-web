@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react"
 import { useNavigate, useParams } from "react-router"
 import { RingCountdown } from "@/components/RingCountdown"
-import { SongCard } from "@/components/SongCard"
+import { SongCarousel } from "@/components/SongCarousel"
 import {
   DAILY_PLAY_LIMIT,
   IDLE_RETURN_TIMEOUT_MS,
   SONG_CHOICES_COUNT,
+  SONGS_PER_PAGE,
 } from "@/constants/app"
 import { getPlayCountToday, recordPlay } from "@/services/database"
 import { getOrCreateNickname } from "@/services/nameGenerator"
@@ -83,23 +84,23 @@ export function SelectPage() {
   return (
     <div className="flex flex-col h-full bg-[var(--color-bg)] p-6">
       {/* Header */}
-      <div className="flex-1 flex flex-col items-center justify-center">
+      <div className="shrink-0 flex flex-col items-center justify-center">
         {nickname && (
-          <h2 className="text-2xl font-semibold text-[var(--color-text)] p-4">
+          <h2 className="text-2xl font-semibold text-[var(--color-text)] p-2">
             Welcome, {nickname}!
           </h2>
         )}
         {creditsRemaining !== null && (
-          <p className="text-[var(--color-text-secondary)] p-4">
+          <p className="text-[var(--color-text-secondary)] p-2">
             {creditsRemaining}/{DAILY_PLAY_LIMIT} credits remaining
           </p>
         )}
       </div>
 
-      {/* Content */}
-      <div className="flex-1 w-full">
+      {/* Content — takes the remaining space; song cards shrink to fit it */}
+      <div className="flex-1 min-h-0 w-full flex flex-col">
         {creditsRemaining === 0 ? (
-          <div className="flex-1 flex flex-col items-center p-6">
+          <div className="my-auto flex flex-col items-center p-6">
             <h2 className="text-2xl font-semibold text-center text-[var(--color-text)]">
               Daily Limit Reached
             </h2>
@@ -110,8 +111,8 @@ export function SelectPage() {
             </p>
           </div>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center p-6">
-            <h2 className="text-2xl font-semibold text-[var(--color-text)]">
+          <div className="flex-1 min-h-0 flex flex-col items-center pt-4">
+            <h2 className="shrink-0 text-2xl font-semibold text-[var(--color-text)]">
               Pick a Song
             </h2>
             {loading ? (
@@ -121,25 +122,22 @@ export function SelectPage() {
             ) : error ? (
               <p className="text-[#e53935] text-center mt-4 px-4">{error}</p>
             ) : (
-              <div className="flex flex-wrap justify-center gap-4 max-w-[600px] mt-4">
-                {tracks.map((track) => (
-                  <SongCard
-                    key={track.id}
-                    track={track}
-                    onPress={() => {
-                      resetIdleTimer()
-                      handleSelectTrack(track)
-                    }}
-                  />
-                ))}
-              </div>
+              <SongCarousel
+                className="flex-1 min-h-0 w-full max-w-[640px] mt-4"
+                tracks={tracks}
+                perPage={SONGS_PER_PAGE}
+                onSelect={(track) => {
+                  resetIdleTimer()
+                  handleSelectTrack(track)
+                }}
+              />
             )}
           </div>
         )}
       </div>
 
-      {/* Footer — countdown + back button */}
-      <div className="flex-1 flex flex-col justify-center items-center gap-4">
+      {/* Footer — countdown + back button, always visible */}
+      <div className="shrink-0 flex flex-col justify-center items-center gap-4 pt-4">
         <RingCountdown
           key={countdownKey}
           totalSeconds={Math.floor(IDLE_RETURN_TIMEOUT_MS / 1000)}
@@ -150,7 +148,7 @@ export function SelectPage() {
           type="button"
           onClick={() => navigate("/", { replace: true })}
           className="px-6 py-3 bg-green-400 rounded-lg active:opacity-60 transition-opacity">
-          <span className="text-black text-xl">Back to Home</span>
+          <span className="text-black text-lg">Back to Home</span>
         </button>
       </div>
     </div>
